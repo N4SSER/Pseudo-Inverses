@@ -53,11 +53,11 @@ PROGRAM PINV
    PRINT *, T2-T1
    
    PRINT *,'Homeier Scheme'
+   X = (1/alpha**2)*TRANSPOSE(A)
    K = 0
    NORM = 0
-   X = (1/alpha**2)*TRANSPOSE(A)
    CALL CPU_TIME(T1)
-   CALL HOMEIER(A,I,X,M,N,K,100,NORM)
+   CALL HOMEIER(A,I,X,M,N,K,300,NORM)
    CALL CPU_TIME(T2)
    PRINT *, 'K = '
    PRINT *, K
@@ -66,11 +66,12 @@ PROGRAM PINV
    PRINT *, 'TIME = '
    PRINT *, T2-T1
 
-   PRINT *, 'Mid Point scheme'
+   PRINT *, 'Toutonian and Soleymani scheme'
    X = (1/alpha**2)*TRANSPOSE(A)
    K = 0
+   NORM = 0
    CALL CPU_TIME(T1)
-   CALL MIDPOINT(A,I,X,M,N,K,100,NORM)
+   CALL SOLEYMANI(A,I,X,M,N,K,300,NORM)
    CALL CPU_TIME(T2)
 
    PRINT *, 'K = '
@@ -133,7 +134,7 @@ PROGRAM PINV
         DOUBLE PRECISION :: I(M,M),A(M,N),X(N,M),Y(M,M),NORM
         DO I_ = 1,ITERS
             Y = MATMUL(A,X)
-            X = MATMUL(X,I+MATMUL((1/2)*(I-Y),(I+(2*I-Y)**2)))
+            X = MATMUL(X,(I+0.5*MATMUL((I-Y),(I+MATMUL((2*I-Y),(2*I-Y))))))
             NORM = NORM2( MATMUL(MATMUL(A,X),A)-A)
             IF(NORM < 0.00001) THEN
                     EXIT
@@ -141,11 +142,11 @@ PROGRAM PINV
             K = K+1
         END DO
     END 
-    SUBROUTINE MIDPOINT(A,I,X,M,N,K,ITERS,NORM)
-        DOUBLE PRECISION :: I(N,N),A(M,N),X(N,M),Y(N,N),NORM
+    SUBROUTINE SOLEYMANI(A,I,X,M,N,K,ITERS,NORM)
+        DOUBLE PRECISION :: I(M,M),A(M,N),X(N,M),Y(M,M),NORM
         DO I_ = 1,ITERS
-                Y = MATMUL(X,A)
-                X = MATMUL(I+MATMUL(1/4*(I-Y),(3*I-Y)**2),X)
+                Y = MATMUL(A,X)
+                X =0.5*MATMUL(X,(9*I-MATMUL(Y,(16*I-MATMUL(Y,(14*I-MATMUL(Y,(6*I-Y))))))))
                 NORM = NORM2(MATMUL(MATMUL(A,X),A)-A)
                 IF(NORM < 0.00001) THEN
                         EXIT
